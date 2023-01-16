@@ -16,6 +16,7 @@ import PlayerPixelCounter from "../components/PlayerPixelCounter";
 import Powered from "../components/Powered";
 import Footer from "../components/Footer";
 import Greeting from "../components/Greeting";
+import Link from "next/link";
 
 export default function Home() {
   const [selectedColor, setSelectedColor] = useState<Color>(colors[0]);
@@ -55,6 +56,11 @@ export default function Home() {
           <WalletMultiButton className="!bg-gray-900 hover:scale-105" />
           <PlayerPixelCounter program={anchorProgram} />
         </div>
+          <Link href="/rules">
+            <div className="text-xl uppercase font-bold hover:cursor-pointer">
+              How to play
+            </div>
+          </Link>
 
         <ColorSelector
           selectedColor={selectedColor}
