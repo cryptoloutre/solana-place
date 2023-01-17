@@ -1,25 +1,25 @@
 import Title from "./Title";
 import Link from "next/link";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import Powered from "./Powered";
-import Footer from "./Footer";
-import PlayerPixelCounter from "./PlayerPixelCounter";
-import Greeting from "./Greeting";
-import { useState } from "react";
 
 export default function Rules() {
-  const [language, setLanguage] = useState("en");
 
   return (
     <div className="flex flex-col items-stretch gap-8 px-4 pt-16 mx-auto w-[90%] h-screen">
       <main className="flex flex-col gap-4">
         <Title />
 
+        <div className="flex">
         <Link href="/">
-          <div className="text-xl uppercase font-bold hover:cursor-pointer">
+          <div className="text-xl uppercase mr-4 font-bold hover:cursor-pointer">
             Home
           </div>
         </Link>
+        <Link href="/livechat">
+            <div className="text-xl uppercase font-bold hover:cursor-pointer">
+              Live Chat
+            </div>
+          </Link>
+          </div>
 
         <div className="mb-4">
           <div className="flex justify-center text-3xl uppercase font-bold underline mb-[2%]">

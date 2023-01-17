@@ -9,9 +9,9 @@ import {
   useAnchorWallet,
   useConnection,
 } from "@solana/wallet-adapter-react";
-import { AnchorProvider, BN, Program } from "@project-serum/anchor";
+import { AnchorProvider, Program } from "@project-serum/anchor";
 import { SolPlace, IDL } from "../idl/sol_place";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import PlayerPixelCounter from "../components/PlayerPixelCounter";
 import Powered from "../components/Powered";
 import Footer from "../components/Footer";
@@ -56,11 +56,18 @@ export default function Home() {
           <WalletMultiButton className="!bg-gray-900 hover:scale-105" />
           <PlayerPixelCounter program={anchorProgram} />
         </div>
+        <div className="flex">
           <Link href="/rules">
-            <div className="text-xl uppercase font-bold hover:cursor-pointer">
+            <div className="text-xl uppercase font-bold mr-4 hover:cursor-pointer">
               How to play
             </div>
           </Link>
+          <Link href="/livechat">
+            <div className="text-xl uppercase font-bold hover:cursor-pointer">
+              Live Chat
+            </div>
+          </Link>
+        </div>
 
         <ColorSelector
           selectedColor={selectedColor}

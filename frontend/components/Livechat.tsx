@@ -1,72 +1,108 @@
-export default function Powered() {
+import Title from "./Title";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Postbox,
+  DispatchConnection,
+  PostboxTarget,
+} from "@usedispatch/client";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+
+export default function Livechat() {
+  const [message, setMessage] = useState<string>("");
+  const dispatchConnection = new Connection("https://rpc.helius.xyz/?api-key=cc778adb-f9ab-45da-ba44-b4096f663c16")
+  const wallet = useWallet();
+  const { publicKey } = useWallet();
+  const targetKey = new PublicKey(
+    "Bmgzy9uhBVfeACPbaAHmHBMSmKnQZD3ecXD3VF5p5Qt5"
+  );
+  const target: PostboxTarget = { key: targetKey, str: "SolanaPlace chat" };
+  const [posts, setPosts] = useState([]);
+  const [fetchingPosts, setFetchingPosts] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+
+  const fetchPosts = async () => {
+    if (publicKey) {
+      setFetchingPosts(true);
+      const dispatchConn = new DispatchConnection(dispatchConnection, wallet, {
+        cluster: "mainnet-beta",
+      });
+      const postbox = new Postbox(dispatchConn, target);
+      const topics = await postbox.fetchPosts();
+      console.log(topics);
+      setPosts(topics);
+      setFetchingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [wallet]);
+
+  const checkIfConnected = async () => {
+    if (publicKey) {
+      setIsConnected(true);
+    } else {
+      setIsConnected(false);
+    }
+  };
+
+  useEffect(() => {
+    checkIfConnected();
+  }, [wallet]);
+
+  const setRef = useCallback(node => {
+    if (node) {
+      node.scrollIntoView({ smooth: true })
+    }
+  }, [])
+  
+  const sendPost = async () => {
+    if (publicKey) {
+      const dispatchConn = new DispatchConnection(dispatchConnection, wallet, {
+        cluster: "mainnet-beta",
+      });
+      const postbox = new Postbox(dispatchConn, target);
+      if (message != "") {
+        console.log("posting");
+        const post = await postbox.createPost({ body: message });
+        console.log(post);
+        const topics = await postbox.fetchPosts();
+        setPosts(topics);
+        setMessage("");
+      }
+      // const initialize = await postbox.initialize()
+      // console.log(initialize)
+    }
+  };
   return (
-    <div className="flex justify-center">
-      <div className="mt-4">
-        <div className="flex justify-center">
-          <h1 className="text-lg uppercase font-bold mb-2">Powered by</h1>
+    <div className="flex flex-col items-stretch gap-8 px-4 pt-16 mx-auto w-[90%]">
+      <main className="flex flex-col gap-2">
+        <Title />
+
+        <div className="flex items-center">
+          <WalletMultiButton className="!bg-gray-900 hover:scale-105" />
         </div>
-        <div className="flex mb-2">
-          <a href="https://solana.com/" target="_blank" rel="noreferrer">
-            <svg
-              width="162"
-              height="24"
-              viewBox="0 0 162 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mx-4"
-            >
-              <g clipPath="url(#clip0_4_762)">
-                <path
-                  d="M27.28 18.92L22.85 23.67C22.7554 23.7749 22.6396 23.8585 22.5104 23.9154C22.3811 23.9723 22.2412 24.0011 22.1 24H1.1C0.99963 23.9991 0.901655 23.9692 0.817906 23.9139C0.734158 23.8586 0.668214 23.7802 0.628036 23.6882C0.587858 23.5962 0.575163 23.4946 0.591482 23.3955C0.607801 23.2965 0.652438 23.2043 0.720004 23.13L5.15 18.38C5.34797 18.1785 5.61757 18.0635 5.9 18.06H26.9C27.0004 18.0582 27.0991 18.0861 27.1837 18.1401C27.2683 18.1942 27.3351 18.272 27.3756 18.3638C27.4162 18.4557 27.4288 18.5574 27.4118 18.6564C27.3948 18.7553 27.3489 18.847 27.28 18.92ZM22.85 9.36003C22.7582 9.24971 22.6436 9.16045 22.5142 9.09833C22.3848 9.03621 22.2435 9.00269 22.1 9.00003H1.1C0.999626 8.99823 0.90095 9.0261 0.816342 9.08014C0.731734 9.13418 0.664957 9.21199 0.624382 9.30382C0.583806 9.39565 0.571235 9.49742 0.588246 9.59636C0.605256 9.6953 0.65109 9.78702 0.720004 9.86003L5.15 14.61C5.23896 14.7259 5.3522 14.8208 5.48177 14.8882C5.61134 14.9556 5.7541 14.9937 5.9 15H26.9C27.0004 15.0018 27.0991 14.974 27.1837 14.9199C27.2683 14.8659 27.3351 14.7881 27.3756 14.6962C27.4162 14.6044 27.4288 14.5026 27.4118 14.4037C27.3948 14.3048 27.3489 14.213 27.28 14.14L22.85 9.36003ZM1.1 5.94003H22.1C22.3824 5.93654 22.652 5.82151 22.85 5.62003L27.28 0.870029C27.3476 0.795795 27.3922 0.703593 27.4085 0.60455C27.4248 0.505507 27.4121 0.403857 27.372 0.311871C27.3318 0.219884 27.2659 0.141492 27.1821 0.086157C27.0984 0.030822 27.0004 0.000909125 26.9 2.89806e-05H5.9C5.75878 -0.00104618 5.61892 0.0278057 5.48965 0.084685C5.36038 0.141564 5.24463 0.225181 5.15 0.330029L0.720004 5.08003C0.65109 5.15304 0.605256 5.24476 0.588246 5.3437C0.571235 5.44264 0.583806 5.5444 0.624382 5.63623C0.664957 5.72806 0.731734 5.80587 0.816342 5.85992C0.90095 5.91396 0.999626 5.94183 1.1 5.94003Z"
-                  fill="url(#paint0_linear_4_762)"
-                />
-                <path
-                  d="M53.23 10.1501H42V6.45005H56.15V2.75005H42C41.5154 2.74742 41.035 2.84026 40.5863 3.02327C40.1376 3.20628 39.7294 3.47588 39.3849 3.81667C39.0404 4.15746 38.7664 4.56278 38.5785 5.00947C38.3906 5.45616 38.2926 5.93547 38.29 6.42005V10.1801C38.2926 10.6646 38.3906 11.144 38.5785 11.5906C38.7664 12.0373 39.0404 12.4426 39.3849 12.7834C39.7294 13.1242 40.1376 13.3938 40.5863 13.5768C41.035 13.7598 41.5154 13.8527 42 13.8501H53.21V17.5501H38.52V21.2501H53.23C53.7192 21.2593 54.2054 21.1715 54.6605 20.9916C55.1155 20.8116 55.5304 20.5433 55.881 20.2019C56.2316 19.8606 56.511 19.4531 56.7031 19.0031C56.8952 18.553 56.9961 18.0694 57 17.5801V13.8201C56.9961 13.3307 56.8952 12.8471 56.7031 12.397C56.511 11.947 56.2316 11.5395 55.881 11.1982C55.5304 10.8568 55.1155 10.5885 54.6605 10.4086C54.2054 10.2286 53.7192 10.1408 53.23 10.1501Z"
-                  fill="black"
-                />
-                <path
-                  d="M75 2.75012H63.72C63.2346 2.74617 62.7532 2.83803 62.3033 3.02045C61.8534 3.20287 61.444 3.47226 61.0984 3.81318C60.7529 4.15411 60.478 4.55986 60.2895 5.00721C60.101 5.45455 60.0026 5.9347 60 6.42012V17.5801C60.0026 18.0647 60.1007 18.544 60.2885 18.9907C60.4764 19.4374 60.7504 19.8427 61.0949 20.1835C61.4394 20.5243 61.8477 20.7939 62.2964 20.9769C62.7451 21.1599 63.2254 21.2528 63.71 21.2501H75C75.9796 21.2554 76.9213 20.8721 77.6187 20.1841C78.316 19.4961 78.7121 18.5597 78.72 17.5801V6.42012C78.7121 5.44056 78.316 4.50411 77.6187 3.81613C76.9213 3.12815 75.9796 2.7448 75 2.75012ZM75 17.5501H63.75V6.45012H75V17.5501Z"
-                  fill="black"
-                />
-                <path
-                  d="M114.5 2.75018H103.5C103.015 2.74754 102.535 2.84038 102.086 3.02339C101.638 3.2064 101.229 3.476 100.885 3.81679C100.54 4.15759 100.266 4.5629 100.078 5.00959C99.8906 5.45628 99.7926 5.9356 99.79 6.42018V21.2502H103.53V15.1702H114.53V21.2502H118.27V6.42018C118.266 5.93087 118.165 5.44719 117.973 4.99714C117.781 4.54709 117.502 4.13961 117.151 3.79829C116.8 3.45697 116.386 3.18858 115.93 3.00867C115.475 2.82877 114.989 2.7409 114.5 2.75018ZM114.5 11.4702H103.5V6.47018H114.5V11.4702Z"
-                  fill="black"
-                />
-                <path
-                  d="M158.29 2.75005H147.29C146.805 2.74742 146.325 2.84026 145.876 3.02327C145.428 3.20628 145.019 3.47588 144.675 3.81667C144.33 4.15746 144.056 4.56278 143.869 5.00947C143.681 5.45616 143.583 5.93547 143.58 6.42005V21.2501H147.32V15.1701H158.27V21.2501H162V6.42005C161.997 5.93547 161.899 5.45616 161.711 5.00947C161.524 4.56278 161.25 4.15746 160.905 3.81667C160.561 3.47588 160.152 3.20628 159.704 3.02327C159.255 2.84026 158.775 2.74742 158.29 2.75005ZM158.29 11.4701H147.31V6.47005H158.26L158.29 11.4701Z"
-                  fill="black"
-                />
-                <path
-                  d="M136.5 17.55H135L129.65 4.29002C129.463 3.83378 129.145 3.4436 128.735 3.16929C128.325 2.89499 127.843 2.74902 127.35 2.75002H124C123.347 2.74735 122.719 3.00367 122.254 3.46285C121.789 3.92203 121.525 4.54667 121.52 5.20002V21.25H125.26V6.45002H126.76L132.12 19.71C132.307 20.1663 132.626 20.5564 133.035 20.8307C133.445 21.1051 133.927 21.251 134.42 21.25H137.75C138.073 21.2513 138.393 21.189 138.692 21.0666C138.991 20.9442 139.263 20.7641 139.492 20.5366C139.722 20.3091 139.904 20.0386 140.029 19.7407C140.154 19.4427 140.219 19.1231 140.22 18.8V2.80002H136.5V17.55Z"
-                  fill="black"
-                />
-                <path
-                  d="M85.77 2.75H82V17.58C82.0026 18.0646 82.1007 18.5439 82.2885 18.9906C82.4764 19.4373 82.7504 19.8426 83.0949 20.1834C83.4394 20.5242 83.8477 20.7938 84.2964 20.9768C84.7451 21.1598 85.2254 21.2526 85.71 21.25H97V17.55H85.77V2.75Z"
-                  fill="black"
-                />
-              </g>
-              <defs>
-                <linearGradient
-                  id="paint0_linear_4_762"
-                  x1="2.85"
-                  y1="24.57"
-                  x2="24.87"
-                  y2="-0.24997"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop offset="0.08" stopColor="#9945FF" />
-                  <stop offset="0.3" stopColor="#8752F3" />
-                  <stop offset="0.5" stopColor="#5497D5" />
-                  <stop offset="0.6" stopColor="#43B4CA" />
-                  <stop offset="0.72" stopColor="#28E0B9" />
-                  <stop offset="0.97" stopColor="#19FB9B" />
-                </linearGradient>
-                <clipPath id="clip0_4_762">
-                  <rect width="162" height="24" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
-          </a>
+        <div className="flex">
+          <Link href="/">
+            <div className="text-xl uppercase font-bold mr-4 hover:cursor-pointer">
+              Home
+            </div>
+          </Link>
+          <Link href="/rules">
+            <div className="text-xl uppercase font-bold hover:cursor-pointer">
+              How to play
+            </div>
+          </Link>
+        </div>
+
+        <div className="flex justify-center">
+          <h1 className="text-3xl font-bold">Live Chat</h1>
+        </div>
+        <div className="flex justify-center font-bold uppercase items-center">
+          Powered By
           <a
             href="https://www.dispatch.forum/"
             target="_blank"
@@ -117,7 +153,115 @@ export default function Powered() {
             </svg>
           </a>
         </div>
-      </div>
+        {isConnected && !fetchingPosts && (
+          <div className="rounded-lg mx-auto mt-2 border-2 border-black h-[650px] w-[300px] sm:w-[590px] overflow-auto shadow-xl">
+            {posts.map((e, index) => {
+              const lastPost = posts.length - 1 === index
+              const message = e.data.body;
+              const _poster = e.poster.toBase58();
+              let poster;
+              poster = _poster.slice(0, 4) + "..." + _poster.slice(-4);
+              if (publicKey) {
+                if (publicKey.toBase58() == _poster) {
+                  poster = "You";
+                }
+              }
+              const time = e.data.ts.toGMTString();
+
+              return (
+                publicKey &&
+                (wallet.publicKey.toBase58() == _poster ? (
+                  <div className="flex justify-end" key={index} ref={lastPost ? setRef : null}>
+                    <div className="mx-4 my-4 ">
+                      <div className="text-xs ml-2 text-right">{time}</div>
+                      <div className="text-white rounded-xl bg-[#122345] w-[250px] px-2 py-2">
+                        <div>{message}</div>
+                        <div className="text-xs mt-2 text-[#cecece] text-right">
+                          From {poster}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mx-4 my-4" key={index} ref={lastPost ? setRef : null}>
+                    <div className="text-xs ml-2">{time}</div>
+                    <div className="text-white rounded-xl bg-black w-[250px] px-2 py-2">
+                      <div>{message}</div>
+                      <div className="text-xs mt-2 text-[#cecece]">
+                        From {poster}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              );
+            })}
+          </div>
+        )}
+        {!isConnected && (
+          <div className="rounded-lg mx-auto mt-2 border-2 border-black h-[650px] w-[300px] sm:w-[590px] overflow-auto shadow-xl">
+            <div className="flex justify-center h-[640px] items-center">
+              <div className="font-bold text-lg">Connect your wallet!</div>
+            </div>
+          </div>
+        )}
+
+        {isConnected && fetchingPosts && (
+          <div className="rounded-lg mx-auto mt-2 border-2 border-black h-[650px] w-[300px] sm:w-[590px] overflow-auto shadow-xl">
+            <div className="flex justify-center h-[640px] items-center">
+              <div className="font-bold text-lg">
+                <svg
+                  role="status"
+                  className="inline mr-3 w-4 h-4 text-black animate-spin"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="#E5E7EB"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                Fetching messages
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isConnected ? (
+          <div className="flex justify-center my-2">
+            <div className="border-2 rounded-lg border-black w-[270px] sm:w-[510px] h-[40px] flex ">
+              <input
+                className="rounded-lg w-[270px] sm:w-[510px] pl-2"
+                type="text"
+                value={message}
+                placeholder="Type your message"
+                onChange={(e) => setMessage(e.target.value)}
+              ></input>
+            </div>
+            <button
+              className="bg-black text-white uppercase font-bold px-4 rounded-xl ml-2"
+              onClick={sendPost}
+            >
+              Send
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-center my-2">
+            <div className="border-2 rounded-lg border-black w-[270px] sm:w-[510px] h-[40px] flex hover:cursor-not-allowed items-center">
+              <div className="rounded-lg w-[270px] sm:w-[510px] pl-2">
+                Type your message
+              </div>
+            </div>
+            <button className="bg-black text-white uppercase font-bold px-4 rounded-xl ml-2 hover:cursor-not-allowed">
+              Send
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
