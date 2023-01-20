@@ -9,7 +9,7 @@ import { clusterApiUrl } from '@solana/web3.js'
 require('@solana/wallet-adapter-react-ui/styles.css');
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const endpoint = clusterApiUrl('devnet')
+  const endpoint = "https://rpc.helius.xyz/?api-key=507ca21a-0781-4b6d-8627-583baf9e499e";
   
   const wallets = [
     new PhantomWalletAdapter(),
