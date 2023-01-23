@@ -9,7 +9,7 @@ import { clusterApiUrl } from '@solana/web3.js'
 require('@solana/wallet-adapter-react-ui/styles.css');
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const endpoint = "https://rpc.helius.xyz/?api-key=e2ff09e4-d800-4b10-bb34-40f6044c1191";
+  const endpoint = "https://rpc.helius.xyz/?api-key=99a1caeb-29e1-4227-b17b-867a72aeb367";
   // const endpoint = "https://rpc.helius.xyz/?api-key=507ca21a-0781-4b6d-8627-583baf9e499e";
   // https://solana-mainnet.rpc.extrnode.com
   
